@@ -5,6 +5,7 @@ import frameModule = require("ui/frame");
 frameModule.Frame.defaultAnimatedNavigation = false;
 
 export var allTests = {};
+allTests["API"] = require("./api-definition-tests");
 allTests["DOCKLAYOUT"] = require("./layouts/dock-layout-tests");
 allTests["WRAPLAYOUT"] = require("./layouts/wrap-layout-tests");
 allTests["ABSOLUTELAYOUT"] = require("./layouts/absolute-layout-tests");
