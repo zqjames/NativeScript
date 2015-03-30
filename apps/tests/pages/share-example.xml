@@ -1,0 +1,6 @@
+<Page loaded="pageLoaded">
+  <Page.optionsMenu>
+    <MenuItem text="share" tap="shareTap" />
+  </Page.optionsMenu>
+  <!-- Other content -->
+</Page>
