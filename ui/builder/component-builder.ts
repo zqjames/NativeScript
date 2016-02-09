@@ -167,9 +167,10 @@ export function setPropertyValue(instance: View, instanceModule: Object, exports
         var handler = exports && exports[propertyValue];
 
         // Check if the handler is function and add it to the instance for specified event name.
-        if (isFunction(handler)) {
-            instance.on(propertyName, handler);
+        if (!isFunction(handler)) {
+            throw new Error(`Expected "${propertyValue}" to be a function.`);
         }
+        instance.on(propertyName, handler);
     } else {
         let attrHandled = false;
         let specialSetter = getSpecialPropertySetter(propertyName);
