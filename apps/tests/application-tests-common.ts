@@ -14,11 +14,13 @@ import platform = require("platform");
 // ### Checking the target platform
 // Use the following code in case you need to check somewhere in your code the platform you are running against:
 // ``` JavaScript
+// >> sum-snippet
 if (app.android) {
     console.log("We are running on Android device!");
 } else if (app.ios) {
     console.log("We are running on iOS device");
 }
+// << sum-snippet
 // ```
 // </snippet>
 
