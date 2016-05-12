@@ -205,6 +205,9 @@ export class Page extends ContentView implements dts.Page {
 
     public onNavigatedTo(isBackNavigation: boolean) {
         this.notify(this.createNavigatedData(Page.navigatedToEvent, isBackNavigation));
+        if (global.__domDebugger) {
+            global.__domDebugger.events.documentUpdated();
+        }
     }
 
     public onNavigatingFrom(isBackNavigation: boolean) {

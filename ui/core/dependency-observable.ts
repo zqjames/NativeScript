@@ -362,6 +362,10 @@ export class DependencyObservable extends Observable implements definition.Depen
             });
         }
 
+        if (global.__domDebugger && (<any>this)._domId >= 0) {
+            global.__domDebugger.events.attributeModified((<any>this)._domId, property.name, "" + newValue);
+        }
+
         if (this.hasListeners(Observable.propertyChangeEvent)) {
             var changeData = super._createPropertyChangeData(property.name, newValue);
             this.notify(changeData);

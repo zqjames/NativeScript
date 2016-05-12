@@ -861,6 +861,10 @@ export class Style extends DependencyObservable implements styling.Style {
         this._view._checkMetadataOnPropertyChanged(property.metadata);
 
         this._applyProperty(property, newValue);
+
+        if (global.__domDebugger && this._view._domId >= 0) {
+            global.__domDebugger.events.attributeModified(this._view._domId, property.name, "" + newValue);
+        }
     }
 
     public _syncNativeProperties() {
