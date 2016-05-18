@@ -372,8 +372,9 @@ declare module "ui/core/view" {
          * @param child             The view to be measured.
          * @param measuredWidth	    The measured width that the parent layout specifies for this view.
          * @param measuredHeight	The measured height that the parent layout specifies for this view.
+         * @param useCache          If the child view should cache the measure results for the last specs it was measured with.
          */
-        public static measureChild(parent: View, child: View, widthMeasureSpec: number, heightMeasureSpec: number): { measuredWidth: number; measuredHeight: number };
+        public static measureChild(parent: View, child: View, widthMeasureSpec: number, heightMeasureSpec: number, useCache?: boolean): { measuredWidth: number; measuredHeight: number };
         
         /**
          * Layout a child by taking into account its margins, horizontal and vertical alignments and a given bounds.
@@ -382,8 +383,9 @@ declare module "ui/core/view" {
          * @param top       Top position, relative to parent
          * @param right     Right position, relative to parent
          * @param bottom	Bottom position, relative to parent
+         * @param useCache  If the child view should cache the layout and ignore layouting children when layouted on the same left, top, right and bottom position.
          */
-        public static layoutChild(parent: View, child: View, left: number, top: number, right: number, bottom: number): void;
+        public static layoutChild(parent: View, child: View, left: number, top: number, right: number, bottom: number, useCache?: boolean): void;
 
         /**
          * Utility to reconcile a desired size and state, with constraints imposed

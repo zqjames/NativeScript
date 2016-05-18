@@ -170,16 +170,19 @@ export class ListView extends view.View implements definition.ListView {
     public _prepareItem(item: view.View, index: number) {
         if (item) {
             var dataItem = this._getDataItem(index);
-            if (!(dataItem instanceof observable.Observable)) {
-                item.bindingContext = null;
-            }
+            // NOTE: Avoid at all costs. Slows down recycling twice.
+            // if (!(dataItem instanceof observable.Observable)) {
+            //     item.bindingContext = null;
+            // }
             item.bindingContext = dataItem;
-            item._inheritProperties(this);
+            // Why? If we are not recycling, why?
+            // item._inheritProperties(this);
         }
     }
 
     private _getDataItem(index: number): any {
-        return this.items.getItem ? this.items.getItem(index) : this.items[index];
+        let thisItems = this.items;
+        return thisItems.getItem ? thisItems.getItem(index) : thisItems[index];
     }
 
     public _getDefaultItemContent(index: number): view.View {
@@ -216,7 +219,7 @@ export class ListView extends view.View implements definition.ListView {
         this.refresh();
     }
 
-    public _propagateInheritableProperties(view: view.View) {
-        // do not get binding context from parent when adding items, since the binding context of the items will be different.
-    }
+    // public _propagateInheritableProperties(view: view.View) {
+    //     // do not get binding context from parent when adding items, since the binding context of the items will be different.
+    // }
 }

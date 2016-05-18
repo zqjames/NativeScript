@@ -20,6 +20,22 @@ import * as visualStateModule from "../styling/visual-state";
 import * as animModule from "ui/animation";
 import { Source } from "utils/debug";
 
+interface MeasureCache {
+    widthMeasureSpec: number,
+    heightMeasureSpec: number,
+    result: {
+        measuredWidth: number,
+        measuredHeight: number
+    }
+}
+
+interface LayoutCache {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+}
+
 var bindable: typeof bindableModule;
 function ensureBindable() {
     if (!bindable) {
@@ -183,6 +199,9 @@ export class View extends ProxyObject implements definition.View {
     public _cssClasses: Array<string> = [];
 
     public _gestureObservers = {};
+    
+    private _measureCache: MeasureCache;
+    private _layoutCache: LayoutCache;
 
     public getGestureObservers(type: gestures.GestureTypes): Array<gestures.GesturesObserver> {
         return this._gestureObservers[type];
@@ -652,6 +671,8 @@ export class View extends ProxyObject implements definition.View {
     }
 
     public requestLayout(): void {
+        delete this._measureCache;
+        delete this._layoutCache;
         this._isLayoutValid = false;
     }
 
@@ -688,10 +709,21 @@ export class View extends ProxyObject implements definition.View {
         return Math.round(result + 0.499) | (childMeasuredState & utils.layout.MEASURED_STATE_MASK);
     }
 
-    public static layoutChild(parent: View, child: View, left: number, top: number, right: number, bottom: number): void {
-
-        if (!child || !child._isVisible) {
+    public static layoutChild(parent: View, child: View, left: number, top: number, right: number, bottom: number, useCache?: boolean): void {
+        if (!child) {
             return;
+        }
+        
+        if (!child._isVisible) {
+            delete child._layoutCache;
+            return;
+        }
+        
+        if (useCache) {
+            let cache = child._layoutCache;
+            if (cache && cache.top === top && cache.right === right && cache.bottom === bottom && cache.left === left) {
+                return;
+            }
         }
 
         var density = utils.layout.getDisplayDensity();
@@ -774,40 +806,68 @@ export class View extends ProxyObject implements definition.View {
             trace.write(child.parent + " :layoutChild: " + child + " " + childLeft + ", " + childTop + ", " + childRight + ", " + childBottom, trace.categories.Layout);
         }
         child.layout(childLeft, childTop, childRight, childBottom);
+        
+        if (useCache) {
+            child._layoutCache = { top, right, bottom, left };
+        }
     }
-
-    public static measureChild(parent: View, child: View, widthMeasureSpec: number, heightMeasureSpec: number): { measuredWidth: number; measuredHeight: number } {
-        var measureWidth = 0;
-        var measureHeight = 0;
-
-        if (child && child._isVisible) {
-
-            var width = utils.layout.getMeasureSpecSize(widthMeasureSpec);
-            var widthMode = utils.layout.getMeasureSpecMode(widthMeasureSpec);
-
-            var height = utils.layout.getMeasureSpecSize(heightMeasureSpec);
-            var heightMode = utils.layout.getMeasureSpecMode(heightMeasureSpec);
-
-            var childWidthMeasureSpec = View.getMeasureSpec(child, width, widthMode, true);
-            var childHeightMeasureSpec = View.getMeasureSpec(child, height, heightMode, false);
-
-            if (trace.enabled) {
-                trace.write(child.parent + " :measureChild: " + child + " " + utils.layout.measureSpecToString(childWidthMeasureSpec) + ", " + utils.layout.measureSpecToString(childHeightMeasureSpec), trace.categories.Layout);
+    
+    public static measureChild(parent: View, child: View, widthMeasureSpec: number, heightMeasureSpec: number, useCache?: boolean): { measuredWidth: number; measuredHeight: number } {
+        if (!child) {
+            return { measuredWidth: 0, measuredHeight: 0 }
+        }
+        
+        if (!child._isVisible) {
+            delete child._measureCache;
+            return { measuredWidth: 0, measuredHeight: 0 }
+        }
+        
+        if (useCache) {
+            let cache = child._measureCache;
+            if (cache && cache.widthMeasureSpec === widthMeasureSpec && cache.heightMeasureSpec === heightMeasureSpec) {
+                return cache.result;
             }
+        }
+        
+        var measuredWidth = 0;
+        var measuredHeight = 0;
 
-            child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-            measureWidth = child.getMeasuredWidth();
-            measureHeight = child.getMeasuredHeight();
+        var width = utils.layout.getMeasureSpecSize(widthMeasureSpec);
+        var widthMode = utils.layout.getMeasureSpecMode(widthMeasureSpec);
 
-            var density = utils.layout.getDisplayDensity();
-            let lp: CommonLayoutParams = child.style._getValue(style.nativeLayoutParamsProperty);
+        var height = utils.layout.getMeasureSpecSize(heightMeasureSpec);
+        var heightMode = utils.layout.getMeasureSpecMode(heightMeasureSpec);
 
-            // Convert to pixels.
-            measureWidth = Math.round(measureWidth + (lp.leftMargin + lp.rightMargin) * density);
-            measureHeight = Math.round(measureHeight + (lp.topMargin + lp.bottomMargin) * density);
+        var childWidthMeasureSpec = View.getMeasureSpec(child, width, widthMode, true);
+        var childHeightMeasureSpec = View.getMeasureSpec(child, height, heightMode, false);
+
+        if (trace.enabled) {
+            trace.write(child.parent + " :measureChild: " + child + " " + utils.layout.measureSpecToString(childWidthMeasureSpec) + ", " + utils.layout.measureSpecToString(childHeightMeasureSpec), trace.categories.Layout);
         }
 
-        return { measuredWidth: measureWidth, measuredHeight: measureHeight };
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+        measuredWidth = child.getMeasuredWidth();
+        measuredHeight = child.getMeasuredHeight();
+
+        var density = utils.layout.getDisplayDensity();
+        let lp: CommonLayoutParams = child.style._getValue(style.nativeLayoutParamsProperty);
+
+        // Convert to pixels.
+        measuredWidth = Math.round(measuredWidth + (lp.leftMargin + lp.rightMargin) * density);
+        measuredHeight = Math.round(measuredHeight + (lp.topMargin + lp.bottomMargin) * density);
+        
+        let result = { measuredWidth, measuredHeight };
+        if (useCache) {
+            child._measureCache = {
+                widthMeasureSpec, 
+                heightMeasureSpec,
+                result
+            };
+        } else {
+            delete child._measureCache;
+        }
+
+        return result;
     }
 
     private static getMeasureSpec(view: View, parentLength: number, parentSpecMode: number, horizontal: boolean): number {

@@ -8,6 +8,10 @@ export class TextBase extends common.TextBase {
         this.ios.text = newValue;
         this.style._updateTextDecoration();
         this.style._updateTextTransform();
+        
+        if (this._textAffectsLayout) {
+            this.requestLayout();
+        }
     }
 
     public _setFormattedTextPropertyToNative(value) {

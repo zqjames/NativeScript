@@ -80,7 +80,7 @@ class DataSource extends NSObject implements UITableViewDataSource {
                 let width = utils.layout.getMeasureSpecSize(owner.widthMeasureSpec);
                 let rowHeight = owner._nativeView.rowHeight;
                 let cellHeight = rowHeight > 0 ? rowHeight : owner.getHeight(indexPath.row);
-                view.View.layoutChild(owner, cellView, 0, 0, width, cellHeight);
+                view.View.layoutChild(owner, cellView, 0, 0, width, cellHeight, true);
             }
         }
         return cell;
@@ -312,7 +312,7 @@ export class ListView extends common.ListView {
     private _layoutCell(cellView: view.View, indexPath: NSIndexPath): number {
 
         if (cellView) {
-            var measuredSize = view.View.measureChild(this, cellView, this.widthMeasureSpec, infinity);
+            var measuredSize = view.View.measureChild(this, cellView, this.widthMeasureSpec, infinity, true);
             var height = measuredSize.measuredHeight;
             this.setHeight(indexPath.row, height);
             return height;

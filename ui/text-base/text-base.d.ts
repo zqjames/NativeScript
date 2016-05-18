@@ -49,6 +49,7 @@
         //@private
         _onTextPropertyChanged(data: dependencyObservable.PropertyChangeData): void;
         _setFormattedTextPropertyToNative(value: any): void;
+        _textAffectsLayout: boolean;
         //@endprivate
     }
 }

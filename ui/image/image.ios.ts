@@ -36,6 +36,7 @@ function onImageSourcePropertyChanged(data: dependencyObservable.PropertyChangeD
 
 export class Image extends imageCommon.Image {
     private _ios: UIImageView;
+    private _imageSourceAffectsLayout: boolean = true;
 
     constructor() {
         super();
@@ -53,8 +54,8 @@ export class Image extends imageCommon.Image {
 
     public _setNativeImage(nativeImage: any) {
         this.ios.image = nativeImage;
-
-        if (isNaN(this.width) || isNaN(this.height)) {
+        
+        if (this._imageSourceAffectsLayout) {
             this.requestLayout();
         }
     }
@@ -77,6 +78,8 @@ export class Image extends imageCommon.Image {
 
         var finiteWidth: boolean = widthMode !== utils.layout.UNSPECIFIED;
         var finiteHeight: boolean = heightMode !== utils.layout.UNSPECIFIED;
+        
+        this._imageSourceAffectsLayout = widthMode !== utils.layout.EXACTLY || heightMode !== utils.layout.EXACTLY;
 
         if (nativeWidth !== 0 && nativeHeight !== 0 && (finiteWidth || finiteHeight)) {
             var scale = Image.computeScaleFactor(width, height, finiteWidth, finiteHeight, nativeWidth, nativeHeight, this.stretch);

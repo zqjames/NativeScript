@@ -44,13 +44,21 @@ class UILabelImpl extends UILabel {
         let owner = this._owner.get();
         let textRect: CGRect;
         let size = rect.size;
+        let sizeWidth = size.width;
+        let sizeHeight = size.height;
+        let borderWidth = owner.borderWidth;
+
         if (owner) {
-            textRect = CGRectMake((owner.borderWidth + owner.style.paddingLeft), (owner.borderWidth + owner.style.paddingTop),
-                size.width - (owner.borderWidth + owner.style.paddingLeft + owner.style.paddingRight + owner.borderWidth),
-                size.height - (owner.borderWidth + owner.style.paddingTop + owner.style.paddingBottom + owner.borderWidth));
+            let style = owner.style;
+            let paddingLeft = style.paddingLeft;
+            let paddingTop = style.paddingTop;
+
+            textRect = CGRectMake((borderWidth + paddingLeft), (borderWidth + paddingTop),
+                sizeWidth - (borderWidth + paddingLeft + style.paddingRight + borderWidth),
+                sizeHeight - (borderWidth + paddingTop + style.paddingBottom + borderWidth));
         }
         else {
-            textRect = CGRectMake(0, 0, size.width, size.height);
+            textRect = CGRectMake(0, 0, sizeWidth, sizeHeight);
         }
 
         super.drawTextInRect(textRect);
@@ -98,6 +106,8 @@ export class Label extends common.Label {
             if (heightMode === utils.layout.UNSPECIFIED) {
                 height = Number.POSITIVE_INFINITY;
             }
+            
+            this._textAffectsLayout = widthMode !== utils.layout.EXACTLY || heightMode !== utils.layout.EXACTLY;
 
             var nativeSize = nativeView.sizeThatFits(CGSizeMake(width, height));
             var labelWidth = nativeSize.width;
