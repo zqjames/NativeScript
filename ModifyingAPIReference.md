@@ -11,7 +11,7 @@ code in the typescript declaration files (`*.d.ts`)
 ## Building the API-Reference
 The `gruntfile.js` has a special entry point for
 the purpose: use
-    > `grunt apiref`
+> `grunt apiref`
 to extract the API-Reference and have it placed under the `bin/dist/apiref`
 folder.
 
@@ -25,15 +25,15 @@ npm package to style the pages.
 To make changes on the TypeDoc theme itself you need to clone the
 [nativescript-typedoc-theme](https://github.com/NativeScript/nativescript-typedoc-theme)
 repository and run
-    > `npm link`
+> `npm link`
 from within its folder. Then, from within the [NativeScript/NativeScript] repo
 run the command
-    > `npm link nativescript-typedoc-theme`
+> `npm link nativescript-typedoc-theme`
 This will create an [npm link](https://docs.npmjs.com/cli/link) for the theme,
 so that when you make changes in the theme and build it via the
-    > `gulp default`
+> `gulp default`
 command, you will get a fresh theme in your `node_modules` dir. Run
-    > `grunt apiref`
+> `grunt apiref`
 in NativeScript as a next step to get a fresh API-Reference using that theme.
 
 
