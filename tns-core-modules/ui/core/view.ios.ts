@@ -24,16 +24,6 @@ function onAutomationTextPropertyChanged(data: dependencyObservable.PropertyChan
 }
 (<proxy.PropertyMetadata>viewCommon.View.automationTextProperty.metadata).onSetNativeValue = onAutomationTextPropertyChanged;
 
-function onTransfromPropertyChanged(data: dependencyObservable.PropertyChangeData) {
-    var view = <View>data.object;
-    view._updateNativeTransform();
-}
-(<proxy.PropertyMetadata>viewCommon.View.translateXProperty.metadata).onSetNativeValue = onTransfromPropertyChanged;
-(<proxy.PropertyMetadata>viewCommon.View.translateYProperty.metadata).onSetNativeValue = onTransfromPropertyChanged;
-(<proxy.PropertyMetadata>viewCommon.View.scaleXProperty.metadata).onSetNativeValue = onTransfromPropertyChanged;
-(<proxy.PropertyMetadata>viewCommon.View.scaleYProperty.metadata).onSetNativeValue = onTransfromPropertyChanged;
-(<proxy.PropertyMetadata>viewCommon.View.rotateProperty.metadata).onSetNativeValue = onTransfromPropertyChanged;
-
 function onOriginPropertyChanged(data: dependencyObservable.PropertyChangeData) {
     var view = <View>data.object;
     view._updateOriginPoint();
@@ -288,10 +278,15 @@ export class View extends viewCommon.View {
     }
 
     public _updateNativeTransform() {
-        var newTransform = CGAffineTransformIdentity;
-        newTransform = CGAffineTransformTranslate(newTransform, this.translateX, this.translateY);
-        newTransform = CGAffineTransformRotate(newTransform, this.rotate * Math.PI / 180);
-        newTransform = CGAffineTransformScale(newTransform, this.scaleX, this.scaleY);
+        let translateX = this.translateX === undefined ? 0 : this.translateX;
+        let translateY = this.translateY === undefined ? 0 : this.translateY;
+        let scaleX = this.scaleX === undefined ? 1 : this.scaleX;
+        let scaleY = this.scaleY === undefined ? 1 : this.scaleY;
+        let rotate = this.rotate === undefined ? 0 : this.rotate;
+        let newTransform = CGAffineTransformIdentity;
+        newTransform = CGAffineTransformTranslate(newTransform, translateX, translateY);
+        newTransform = CGAffineTransformRotate(newTransform, rotate * Math.PI / 180);
+        newTransform = CGAffineTransformScale(newTransform, scaleX, scaleY);
         if (!CGAffineTransformEqualToTransform(this._nativeView.transform, newTransform)) {
             this._nativeView.transform = newTransform;
             this._hasTransfrom = this._nativeView && !CGAffineTransformEqualToTransform(this._nativeView.transform, CGAffineTransformIdentity);
@@ -509,67 +504,47 @@ export class ViewStyler implements style.Styler {
 
     // Rotate
     private static setRotateProperty(view: View, newValue: any) {
-        view.rotate = newValue;
+        view._updateNativeTransform();
     }
 
     private static resetRotateProperty(view: View, nativeValue: any) {
-        view.rotate = nativeValue;
-    }
-
-    private static getRotateProperty(view: View): any {
-        return view.rotate;
+        view._updateNativeTransform();
     }
 
     //ScaleX
     private static setScaleXProperty(view: View, newValue: any) {
-        view.scaleX = newValue;
+        view._updateNativeTransform();
     }
 
     private static resetScaleXProperty(view: View, nativeValue: any) {
-        view.scaleX = nativeValue;
-    }
-
-    private static getScaleXProperty(view: View): any {
-        return view.scaleX;
+        view._updateNativeTransform();
     }
 
     //ScaleY
     private static setScaleYProperty(view: View, newValue: any) {
-        view.scaleY = newValue;
+        view._updateNativeTransform();
     }
 
     private static resetScaleYProperty(view: View, nativeValue: any) {
-        view.scaleY = nativeValue;
-    }
-
-    private static getScaleYProperty(view: View): any {
-        return view.scaleY;
+        view._updateNativeTransform();
     }
 
     //TranslateX
     private static setTranslateXProperty(view: View, newValue: any) {
-        view.translateX = newValue;
+        view._updateNativeTransform();
     }
 
     private static resetTranslateXProperty(view: View, nativeValue: any) {
-        view.translateX = nativeValue;
-    }
-
-    private static getTranslateXProperty(view: View): any {
-        return view.translateX;
+        view._updateNativeTransform();
     }
 
     //TranslateY
     private static setTranslateYProperty(view: View, newValue: any) {
-        view.translateY = newValue;
+        view._updateNativeTransform();
     }
 
     private static resetTranslateYProperty(view: View, nativeValue: any) {
-        view.translateY = nativeValue;
-    }
-
-    private static getTranslateYProperty(view: View): any {
-        return view.translateY;
+        view._updateNativeTransform();
     }
 
     //z-index
@@ -644,28 +619,23 @@ export class ViewStyler implements style.Styler {
 
         style.registerHandler(style.rotateProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setRotateProperty,
-            ViewStyler.resetRotateProperty,
-            ViewStyler.getRotateProperty));
+            ViewStyler.resetRotateProperty));
 
         style.registerHandler(style.scaleXProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setScaleXProperty,
-            ViewStyler.resetScaleXProperty,
-            ViewStyler.getScaleXProperty));
+            ViewStyler.resetScaleXProperty));
 
         style.registerHandler(style.scaleYProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setScaleYProperty,
-            ViewStyler.resetScaleYProperty,
-            ViewStyler.getScaleYProperty));
+            ViewStyler.resetScaleYProperty));
 
         style.registerHandler(style.translateXProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setTranslateXProperty,
-            ViewStyler.resetTranslateXProperty,
-            ViewStyler.getTranslateXProperty));
+            ViewStyler.resetTranslateXProperty));
 
         style.registerHandler(style.translateYProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setTranslateYProperty,
-            ViewStyler.resetTranslateYProperty,
-            ViewStyler.getTranslateYProperty));
+            ViewStyler.resetTranslateYProperty));
 
         style.registerHandler(style.zIndexProperty, new style.StylePropertyChangedHandler(
             ViewStyler.setZIndexProperty,
